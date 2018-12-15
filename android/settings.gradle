@@ -1,0 +1,3 @@
+rootProject.name = 'touchidreactnative'
+
+include ':app'
