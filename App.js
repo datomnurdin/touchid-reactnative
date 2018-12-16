@@ -1,31 +1,57 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow
- */
+'use strict';
+import React, { Component } from 'react';
+import {
+  AlertIOS,
+  StyleSheet,
+  Text,
+  TouchableHighlight,
+  View,
+} from 'react-native';
 
-import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View} from 'react-native';
+import TouchID from "react-native-touch-id";
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
-  android:
-    'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+export default class FingerPrint extends Component<{}> {
+  constructor() {
+    super()
 
-type Props = {};
-export default class App extends Component<Props> {
+    this.state = {
+      biometryType: null
+    };
+  }
+
+  componentDidMount() {
+    TouchID.isSupported()
+    .then(biometryType => {
+      this.setState({ biometryType });
+    })
+  }
+
   render() {
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>Welcome to React Native!</Text>
-        <Text style={styles.instructions}>To get started, edit App.js</Text>
-        <Text style={styles.instructions}>{instructions}</Text>
+        <TouchableHighlight
+          style={styles.btn}
+          onPress={this.clickHandler}
+          underlayColor="#0380BE"
+          activeOpacity={1}
+        >
+          <Text style={{
+            color: '#fff',
+            fontWeight: '600'
+          }}>
+            {`Authenticate with ${this.state.biometryType}`}
+          </Text>
+        </TouchableHighlight>
       </View>
     );
+  }
+
+  clickHandler() {
+    TouchID.isSupported()
+      .then(authenticate)
+      .catch(error => {
+        AlertIOS.alert('TouchID not supported');
+      });
   }
 }
 
@@ -34,16 +60,26 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    backgroundColor: '#F5FCFF'
   },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
+  btn: {
+    borderRadius: 3,
+    marginTop: 200,
+    paddingTop: 15,
+    paddingBottom: 15,
+    paddingLeft: 15,
+    paddingRight: 15,
+    backgroundColor: '#0391D7'
+  }
 });
+
+function authenticate() {
+  return TouchID.authenticate()
+    .then(success => {
+      AlertIOS.alert('Authenticated Successfully');
+    })
+    .catch(error => {
+      console.log(error)
+      AlertIOS.alert(error.message);
+    });
+}
